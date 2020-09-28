@@ -1,0 +1,42 @@
+version: '3'
+services:
+    apache-php:
+        build: .docker/apache-php
+        container_name: graphql_apache_php
+        ports:
+          - 8091:80
+        volumes:
+          - .:/var/www/html:delegated
+          - .docker/apache-php/vhost.conf:/etc/apache2/sites-available/000-default.conf
+        working_dir: /var/www/html/
+        environment:
+          PHP_EXTENSION_XDEBUG: 1
+          PHP_INI_XDEBUG__REMOTE_PORT: 9000
+          PHP_IDE_CONFIG: "serverName=docker_cockerdrive"
+          XDEBUG_CONFIG: "remote_host=host.docker.internal remote_enable=on"
+        depends_on:
+          - mysql
+        links:
+          - mysql
+
+    mysql:
+      container_name: graphql_mysql
+      build: .docker/db
+      restart: always
+      command: mysqld --sql_mode="NO_ENGINE_SUBSTITUTION"
+      environment:
+        - MYSQL_ROOT_PASSWORD=mysql
+      volumes:
+        # Volume for permanent data and script for create databases
+        - .docker/db/data/mysql:/var/lib/mysql
+        - .docker/db/init:/docker-entrypoint-initdb.d:delegated
+      expose:
+        - 3306
+      ports:
+        - 3391:3306
+
+   # maildev:
+   #     image: djfarrelly/maildev
+   #     container_name: cocker_maildev
+   #     ports:
+   #       - 8191:80
