@@ -2,12 +2,19 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CarRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\NumericFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
 
 /**
  * @ApiResource()
+ * @ApiFilter(RangeFilter::class, properties={"engine"})
+ * @ApiFilter(NumericFilter::class, properties={"wheels"})
+ * @ApiFilter(OrderFilter::class, properties={"id", "wheels"}, arguments={"orderParameterName"="order"})
  * @ORM\Entity(repositoryClass=CarRepository::class)
  */
 class Car
