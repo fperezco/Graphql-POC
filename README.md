@@ -1,16 +1,18 @@
-NOTAS
+# GraphQL POC
 
-pruebas graphql
-
+## Steps:
+```
 composer create-project symfony/skeleton exampleproject '4.4.*'
 composer require serializer
 composer require annotations
 composer require orm 
 composer require orm-fixtures –dev
 composer require api
+```
 
-crear el .htaccess en public
+### Create .htaccess in public:
 
+```
 <IfModule mod_rewrite.c>
     Options -MultiViews
     RewriteEngine On
@@ -23,30 +25,35 @@ crear el .htaccess en public
         RedirectMatch 302 ^/$ /index.php/
     </IfModule>
 </IfModule>
+```
 
-ya podemos acceder a /api
+Now you can access to /api
 
------------------------------------------------
-instalando graphql
+### Install graphql
 
+```
 docker-compose exec apache-php composer req webonyx/graphql-php && docker-compose exec apache-php bin/console cache:clear
+```
 
-echo eso ya es accesible via:
+Now you can access:
 
 http://graphql.local:8091/api/graphql
 
-consulta de prueba:
+## Test queries:
 
+Simple query:
+```
 {
 	carCategory(id: "api/car_categories/1") {
 		id
 		name
 	}
 }
+```
 
+Join query:
 
-consulta conjunta:
-
+```
 {
   car(id: "api/cars/1") {
 		id
@@ -59,8 +66,11 @@ consulta conjunta:
 		name
 	}
 }
----------------traer una coleccion
+```
 
+Retrieve a collection:
+
+```
 {
 	cars{
     edges
@@ -73,8 +83,11 @@ consulta conjunta:
     }
   }
 }
----------------------------consulta una coleccion añadiendo campos anidados
+```
 
+Retrieve a collection with nested fields:
+
+```
 {
 	cars{
     edges
@@ -95,17 +108,25 @@ consulta conjunta:
     }
   }
 }
---------------------------creando un api filter podemos filtrar tanto en api platform como en graphql
+```
 
+Creating and API Filter you can filter in API Platform and GraphQL:
+
+```
 /**
  * @ApiResource()
  * @ApiFilter(NumericFilter::class, properties={"wheels"})
  * @ORM\Entity(repositoryClass=CarRepository::class)
  */
 
+```
+
+Later:
+```
 curl -X GET "http://graphql.local:8091/api/cars?wheels=3&page=1" -H  "accept: application/ld+json"
+```
 
-
+```
 {
 	cars(wheels: 3){
     edges
@@ -126,17 +147,24 @@ curl -X GET "http://graphql.local:8091/api/cars?wheels=3&page=1" -H  "accept: ap
     }
   }
 }
+```
 
-------------------------------------tb podemos especificar los campos de ordenacion tal que:
+We can set as well order fields:
+
+```
 /**
  * @ApiResource()
  * @ApiFilter(NumericFilter::class, properties={"wheels"})
  * @ApiFilter(OrderFilter::class, properties={"id", "wheels"}, arguments={"orderParameterName"="order"})
  * @ORM\Entity(repositoryClass=CarRepository::class)
  */
+```
 
+```
 curl -X GET "http://graphql.local:8091/api/cars?order%5Bwheels%5D=asc&page=1" -H  "accept: application/ld+json"
+```
 
+```
 {
 	cars(order:{id:"desc"}){
     edges
@@ -157,12 +185,19 @@ curl -X GET "http://graphql.local:8091/api/cars?order%5Bwheels%5D=asc&page=1" -H
     }
   }
 }
---------------fitro de rangos
+```
 
+Filter by range:
+
+```
 * @ApiFilter(RangeFilter::class, properties={"price"})
+```
 
+```
 curl -X GET "http://graphql.local:8091/api/cars?engine%5Bbetween%5D=1000%262000&page=1" -H  "accept: application/ld+json"
+```
 
+```
 {
 	cars(order:{id:"desc"}, engine:{gt:"2000"}){
     edges
@@ -183,11 +218,5 @@ curl -X GET "http://graphql.local:8091/api/cars?engine%5Bbetween%5D=1000%262000&
     }
   }
 }
-
-
-----------------------------------------------------------------------
-EN DEFINITIVA, VENTAJAS DE GRAPHQL VS API REST NORMAL:
-
-
-
+```
 
